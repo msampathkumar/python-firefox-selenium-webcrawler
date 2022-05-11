@@ -4,6 +4,25 @@ import psutil
 from multiprocessing import Pool
 
 # External
+# from webdriver_manager.firefox import GeckoDriverManager
+# from selenium.webdriver import Firefox
+#
+# try:
+#     driver = Firefox(executable_path=GeckoDriverManager().install())
+#     print("Selenium WebManager is UP!")
+#     driver.quit()
+#     del driver
+# except Exception as err:
+#     raise Exception("Selenium WebSetup Issue!!")
+#     print(str(err))
+#
+# selenium 4
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
+
+driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()))
+
 from retry import retry
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,7 +31,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import FirefoxOptions
 
 
-THREAD_COUNTS = max(2, round(psutil.cpu_count() * 0.8)) * 3
+THREAD_COUNTS = 2  # max(2, round(psutil.cpu_count() * 0.8)) * 3
 
 test_url_link = "https://cloud.google.com/vpc/docs/configure-private-google-access"
 
@@ -59,6 +78,8 @@ def _open_url(url_link=test_url_link):
     if html:
         print(f"#NoDataFound {url_link}#")
         _save_url_file(fname, html)
+    web_driver.quit()
+    del web_driver
 
 
 def _save_url_file(fname, html):
@@ -78,7 +99,7 @@ def open_url(url_link):
         print(message)
 
 
-def crawler_urls_main(urls_file_name="urls_list"):
+def crawler_urls_main(urls_file_name):
     start_time = time.time()
     print(f"start_time is {start_time}")
     print(f"THREAD_COUNTS is {THREAD_COUNTS}")
@@ -91,4 +112,9 @@ def crawler_urls_main(urls_file_name="urls_list"):
 
 
 if __name__ == "__main__":
-    crawler_urls_main()
+    default_input_urls_list_file = "urls_list"
+    if os.path.isfile(default_input_urls_list_file):
+        crawler_urls_main(default_input_urls_list_file)
+        # os.system('pkill -9 -f "firefox"')
+        # ps -aux | grep php | awk '{print $2}' | xargs kill -9
+        print("==" * 200)
