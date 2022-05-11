@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import FirefoxOptions
 
 
-THREAD_COUNTS = max(2, round(psutil.cpu_count() * 0.66))  # 3
+THREAD_COUNTS = max(2, round(psutil.cpu_count() * 0.8)) * 3
 
 test_url_link = "https://cloud.google.com/vpc/docs/configure-private-google-access"
 
@@ -41,6 +41,8 @@ def _open_url(url_link=test_url_link):
     # Firefox DriverSetup
     opts = FirefoxOptions()
     opts.add_argument("--headless")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
     web_driver = webdriver.Firefox(options=opts)
     web_driver.get(url_link)
     # Time dynamic html elements to load
@@ -76,11 +78,11 @@ def open_url(url_link):
         print(message)
 
 
-def crawler_urls_main():
+def crawler_urls_main(urls_file_name="urls_list"):
     start_time = time.time()
     print(f"start_time is {start_time}")
     print(f"THREAD_COUNTS is {THREAD_COUNTS}")
-    with open('urls_list') as fp:
+    with open(urls_file_name) as fp:
         pool_urls = fp.read().strip().splitlines()
         with Pool(THREAD_COUNTS) as _pool:
             _pool.map(open_url, pool_urls)
